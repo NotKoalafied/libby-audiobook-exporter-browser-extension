@@ -3,7 +3,6 @@ const LAE_NOTICE_ID = 'lae-update-notice'
 const LAE_NOTICE_CLOSE_ID = 'lae-update-notice'
 
 async function main() {
-    chrome.storage.local.get(console.log)
     const notified = await chrome.storage.local.get('lae_update_notified')
     if (Date.now() < ENDING_DATE.getTime() && !notified?.lae_update_notified) {
         const noticeHtml = `Libby Audio Extporter now uses popup (just click the extension icon) instead of inserting elements to the page.`
