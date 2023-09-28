@@ -153,6 +153,7 @@ async function main() {
 //   Do not register listeners asynchronously, as they will not be properly triggered.
 function installedListener(details) {
     if (details.reason === chrome.runtime.OnInstalledReason.UPDATE) {
+        chrome.storage.local.remove('lae_update_notified')
         chrome.tabs.create({ url: "update.html" })
     }
 }
