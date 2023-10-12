@@ -10,6 +10,7 @@ const TOGGLE_LIST_BUTTON_ID = "lae-toggle-list-button"
 const DOWNLOAD_LIST_ID = "lae-download-list"
 const PROGRESS_BAR_ID = "lae-progress-bar"
 const PROGRESS_ID = "lae-progress"
+const LAE_CLOSE_ID = "lae-close"
 
 const INITIAL_BANNER = "Initializing download list...";
 const READY_BANNER = "\u2190 download | toggle list \u2192";
@@ -110,6 +111,9 @@ function attachElements() {
         <button id="${TOGGLE_LIST_BUTTON_ID}"
             class="nav-action-item"
         >List</button>
+        <button id="${LAE_CLOSE_ID}"
+            class="nav-action-item"
+        >&#x2715;</button>
     </div>
     <div id="${DOWNLOAD_LIST_ID}"></div>
     `
@@ -125,6 +129,7 @@ function attachElements() {
 
     laeDiv.querySelector(`#${EXPORT_BUTTON_ID}`).onclick = exportAudio
     laeDiv.querySelector(`#${TOGGLE_LIST_BUTTON_ID}`).onclick = toggleDownloadList
+    laeDiv.querySelector(`#${LAE_CLOSE_ID}`).onclick = () => laeDiv.style.display = "none";
 }
 
 function attachDownloadList() {
