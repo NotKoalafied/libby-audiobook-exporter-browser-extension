@@ -1,4 +1,5 @@
 const Commands = {
+    ReportBooks: 'ReportBooks',
     GetBook: 'GetBook',
     Download: 'Download',
     UpdateBook: 'UpdateBook'

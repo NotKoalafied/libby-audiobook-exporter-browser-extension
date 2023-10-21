@@ -17,63 +17,63 @@ let books = {}
 let commPort = null
 
 async function loadBookFromStorage() {
-    const localBooks = await chrome.storage.local.get('books')
-    books = localBooks?.books ?? {}
-}
-
-function removeExpiredBooks() {
-    Object.keys(books).forEach(
-        titleId => {
-            // `expires` is in seconds, but `Date.now()` in milliseconds
-            if (books[titleId]?.expires * 1000 < Date.now()) {
-                delete books[titleId]
+    const books = await chrome.storage.session.get('books') ?? {}
+    removeExpiredBooks()
+    chrome.storage.session.set(books)
+    function removeExpiredBooks() {
+        Object.keys(books).forEach(
+            titleId => {
+                if (books[titleId]?.expiresAt < Date.now()) {
+                    delete books[titleId]
+                }
             }
-        }
-    )
+        )
+    }
+
 }
 
-async function iframeCallback(details) {
-    const url = new URL(details.url)
-    const baseUrl = url.origin
-    const encodedM = url?.searchParams?.get('m')
-    const m = base64UrlDecode(encodedM)
-    const mObj = JSON.parse(m)
-    const titleId = mObj?.tdata?.codex?.title?.titleId
-    // the `parseInt()` is superfluous, but just to be safe
-    const expires = parseInt(mObj.expires)
-    const openbookUrl = `${baseUrl}/_d/openbook.json`
-    const openbookResponse = await fetch(openbookUrl)
-    const openbook = await openbookResponse.json()
+async function retrieveBooks(passportTitles) {
+    for (const titleId of Object.keys(passportTitles)) {
+        await retrieveBookInfo(titleId)
+        await delayRoughlyMs(200)
+    }
 
-    const book = {}
-    books[titleId] = book
-    book.titleId = titleId
-    book.expires = expires
-    book.openbook = openbook
-    book.title = openbook?.title?.main
-    book.subtitle = openbook?.title?.subtitle
-    book.downloadDir = makePathNameSafe(book.title)
-    book.authors = openbook?.creator
-    book.openbookUrl = openbookUrl
-    book.coverUrl = mObj?.tdata?.codex?.title?.cover?.imageURL
-    book.metaFiles = {}
-    book.metaFiles['openbook.json'] = { url: openbookUrl, downloaded: false }
-    const coverFilename = `cover.${getTailAfter(book.coverUrl, '.')?.toLowerCase() ?? 'jpg'}`
-    book.metaFiles[coverFilename] = { url: book.coverUrl, downloaded: false }
-    const mp3Urls = openbook?.spine.map(
-        x => `${baseUrl}/${x.path}`
-    )
-    book.audios = {}
-    mp3Urls.forEach(
-        (mp3Url, i) => {
-            const match = mp3Url.match(/-[P|p]art\d*\..*?\?/)
-            const suffix = match?.[0]?.slice(0, -1) ?? ("-Part" + (i > 9 ? i : "0" + i) + ".mp3")
-            const filename = `${book.downloadDir}${suffix}`
-            book.audios[filename] = { url: mp3Url, downloaded: false }
-        }
-    )
-    book.downloading = false
-    chrome.storage.local.set({ books: books })
+    async function retrieveBookInfo(titleId) {
+        const passport = passportTitles[titleId].passport
+        const titleProp = passportTitles[titleId].title
+        const openbookUrl = passport?.urls?.openbook
+        const openbookResponse = await fetch(openbookUrl)
+        const openbook = await openbookResponse.json()
+
+        const book = {}
+        books[titleId] = book
+        book.expiresAt = passport.expiresAt
+        book.titleId = titleId
+        book.title = titleProp?.title
+        book.subtitle = titleProp?.subtitle
+        book.downloadDir = makePathNameSafe(book.title)
+        book.creators = titleProp?.creators
+        book.coverUrl = titleProp?.cover?.url
+        book.metaFiles = {}
+        book.metaFiles['openbook.json'] = { url: openbookUrl, downloaded: false }
+        const coverFilename = `cover.${getTailAfter(book.coverUrl, '.')?.toLowerCase() ?? 'jpg'}`
+        book.metaFiles[coverFilename] = { url: book.coverUrl, downloaded: false }
+        const baseUrl = passport.urls.web.endsWith('/') ? passport.urls.web : passport.urls.web + '/'
+        const mp3Urls = openbook?.spine?.map(
+            x => `${baseUrl}${x.path}`
+        )
+        book.audios = {}
+        mp3Urls.forEach(
+            (mp3Url, i) => {
+                const match = mp3Url.match(/-[P|p]art\d*\..*?\?/)
+                const suffix = match?.[0]?.slice(0, -1) ?? ("-Part" + (i > 9 ? i : "0" + i) + ".mp3")
+                const filename = `${book.downloadDir}${suffix}`
+                book.audios[filename] = { url: mp3Url, downloaded: false }
+            }
+        )
+        book.downloading = false
+        chrome.storage.session.set(books)
+    }
 }
 
 async function download(titleId) {
@@ -134,28 +134,36 @@ function commListener(port) {
         }
     )
 
+    // https://stackoverflow.com/a/46628145/404271
+    return true;
+
     port.onDisconnect.addListener(
         () => commPort = null
     )
 }
 
-async function main() {
-    await loadBookFromStorage()
-    removeExpiredBooks()
-    const iframeFilter = { urls: ["*://*.libbyapp.com/?m=eyJ*"] }
-    chrome.webRequest.onCompleted.addListener(iframeCallback, iframeFilter);
-    chrome.runtime.onConnect.addListener(commListener)
+async function installedListener(details) {
+    // It no longer needs any local storage, clear it up.
+    await chrome.storage.local.clear()
 }
 
-// https://stackoverflow.com/a/56405005/404271
-// https://developer.chrome.com/docs/extensions/mv2/background_pages/#listeners
-//   Listeners must be registered synchronously from the start of the page.
-//   Do not register listeners asynchronously, as they will not be properly triggered.
-function installedListener(details) {
-    if (details.reason === chrome.runtime.OnInstalledReason.UPDATE) {
-        chrome.storage.local.remove('lae_update_notified')
-        chrome.tabs.create({ url: "update.html" })
+async function messageListener(message) {
+    switch (message?.command) {
+        case Commands.ReportBooks:
+            await retrieveBooks(message?.books);
+            break;
+        default:
+            console.error(`Message not understood: ${message}`)
     }
+    // https://stackoverflow.com/a/46628145/404271
+    return true;
 }
-chrome.runtime.onInstalled.addListener(installedListener)
+
+async function main() {
+    await loadBookFromStorage()
+    chrome.runtime.onInstalled.addListener(installedListener)
+    chrome.runtime.onConnect.addListener(commListener)
+    chrome.runtime.onMessage.addListener(messageListener)
+}
+
 main()
