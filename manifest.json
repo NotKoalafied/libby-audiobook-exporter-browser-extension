@@ -28,7 +28,6 @@
     "default_title": "Libby Audiobook Exporter"
   },
   "permissions": [
-    "webRequest",
     "downloads",
     "activeTab",
     "storage"

@@ -14,7 +14,6 @@ import { Commands, getTailAfter, base64UrlDecode, makePathNameSafe, delayRoughly
 //   }
 // }
 let books = {}
-let commPort = null
 
 async function loadBookFromStorage() {
     const books = await chrome.storage.session.get('books') ?? {}
@@ -107,39 +106,8 @@ async function downloadFiles(files, book) {
         })
         await delayRoughlyMs(5000)
         fileInfo.downloaded = true
-        if (commPort) {
-            commPort.postMessage({ command: Commands.UpdateBook, book: book })
-        }
+        chrome.runtime.sendMessage({ command: Commands.UpdateBook, book: book })
     }
-}
-
-function commListener(port) {
-    commPort = port
-
-    port.onMessage.addListener(
-        message => {
-            switch (message?.command) {
-                case Commands.GetBook:
-                    port.postMessage({
-                        command: Commands.UpdateBook,
-                        book: books[message.titleId]
-                    })
-                    break;
-                case Commands.Download:
-                    download(message.titleId)
-                    break;
-                default:
-                    console.error(`Message not understood: ${message}`)
-            }
-        }
-    )
-
-    // https://stackoverflow.com/a/46628145/404271
-    return true;
-
-    port.onDisconnect.addListener(
-        () => commPort = null
-    )
 }
 
 async function installedListener(details) {
@@ -152,8 +120,17 @@ async function messageListener(message) {
         case Commands.ReportBooks:
             await retrieveBooks(message?.books);
             break;
+        case Commands.GetBook:
+            chrome.runtime.sendMessage({
+                command: Commands.UpdateBook,
+                book: books[message.titleId]
+            })
+            break;
+        case Commands.Download:
+            download(message.titleId)
+            break;
         default:
-            console.error(`Message not understood: ${message}`)
+            console.error(`[lae] Message not understood: ${message}`)
     }
     // https://stackoverflow.com/a/46628145/404271
     return true;
@@ -162,7 +139,6 @@ async function messageListener(message) {
 async function main() {
     await loadBookFromStorage()
     chrome.runtime.onInstalled.addListener(installedListener)
-    chrome.runtime.onConnect.addListener(commListener)
     chrome.runtime.onMessage.addListener(messageListener)
 }
 
