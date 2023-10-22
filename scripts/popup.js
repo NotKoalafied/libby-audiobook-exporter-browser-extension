@@ -1,7 +1,8 @@
-import { Commands, getTailAfter, dashify } from "./common.js"
+import { Commands, getTailAfter, dashify, delayMs } from "./common.js"
 
 // globals
 let book
+let titleId
 
 // const
 const LAE_EXPLANATION_BANNER_ID = "lae-explanation-banner"
@@ -16,8 +17,10 @@ const laeDownloadList = document.getElementById(DOWNLOAD_LIST_ID);
 const laeExportButton = document.getElementById(EXPORT_BUTTON_ID);
 const laeStatusDiv = document.getElementById(STATUS_ID)
 
-function renderDownloadList() {
+function renderDownloadList(book) {
     if (!book) {
+        laeExplanationBanner.style.display = 'block'
+        laeMain.style.display = 'none';
         return
     }
 
@@ -61,34 +64,27 @@ function renderDownloadList() {
 function exportAudio() {
     chrome.runtime.sendMessage({
         command: Commands.Download,
-        titleId: book.titleId
+        titleId: titleId
     })
 }
 
-function messageListener(message) {
-    switch (message?.command) {
-        case Commands.UpdateBook:
-            book = message.book
-            renderDownloadList()
-            break
-        default:
-            console.error(`[lae] Message not understood: ${message}`)
-    }
-}
-
 async function main() {
-    chrome.runtime.onMessage.addListener(messageListener)
     laeExportButton.addEventListener('click', exportAudio);
 
     const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true })
-    const titleId = getTailAfter(activeTab?.url, '/')
+    titleId = getTailAfter(activeTab?.url, '/')
     if (!titleId) {
         return
     }
-    chrome.runtime.sendMessage({
-        command: Commands.GetBook,
-        titleId: titleId
-    });
+
+    while (true) {
+        const book = await chrome.runtime.sendMessage({
+            command: Commands.GetBook,
+            titleId: titleId
+        });
+        renderDownloadList(book)
+        await delayMs(2000)
+    }
 }
 
 main()

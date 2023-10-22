@@ -115,16 +115,13 @@ async function installedListener(details) {
     await chrome.storage.local.clear()
 }
 
-async function messageListener(message) {
+async function messageListener(message, sender, sendResponse) {
     switch (message?.command) {
         case Commands.ReportBooks:
             await retrieveBooks(message?.books);
             break;
         case Commands.GetBook:
-            chrome.runtime.sendMessage({
-                command: Commands.UpdateBook,
-                book: books[message?.titleId]
-            })
+            sendResponse(books[message?.titleId]);
             break;
         case Commands.Download:
             download(message.titleId)
