@@ -100,6 +100,8 @@ async function download(titleId) {
     await downloadFiles(book.audios, book)
     console.log(`[lae] finish downloading "${book?.title}".`)
     book.downloading = false
+    // update book downloading status
+    chrome.storage.session.set({ books: books })
     return book
 
     function resetDownloadStatus() {
