@@ -90,6 +90,8 @@ async function download(titleId) {
     const book = books[titleId]
     if (book.downloading) {
         return book
+    } else {
+        resetDownloadStatus()
     }
 
     book.downloading = true
@@ -98,22 +100,25 @@ async function download(titleId) {
     await downloadFiles(book.audios, book)
     console.log(`[lae] finish downloading "${book?.title}".`)
     book.downloading = false
-    Object.keys(book.metaFiles).forEach(filename => book.metaFiles[filename].downloaded = false)
-    Object.keys(book.audios).forEach(filename => book.audios[filename].downloaded = false)
     return book
+
+    function resetDownloadStatus() {
+        Object.keys(book.metaFiles).forEach(filename => book.metaFiles[filename].downloaded = false)
+        Object.keys(book.audios).forEach(filename => book.audios[filename].downloaded = false)
+    }
 }
 
 async function downloadFiles(files, book) {
-    for await (const filename of Object.keys(files)) {
+    for (const filename of Object.keys(files)) {
         const fileInfo = files[filename];
         console.log(`[lae] downloading ${fileInfo.url} as ${filename}`)
         await chrome.downloads.download({
             url: fileInfo.url,
             filename: `${book.downloadDir}/${filename}`,
         })
+        fileInfo.downloaded = true
         chrome.storage.session.set({ books: books })
         await delayRoughlyMs(5000)
-        fileInfo.downloaded = true
         // chrome.runtime.sendMessage({ command: Commands.UpdateBook, book: book })
     }
 }

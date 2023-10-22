@@ -85,7 +85,7 @@ async function main() {
         const books = booksWrapper.books ?? {}
         const book = books[titleId]
         renderDownloadList(book)
-        await delayMs(2000)
+        await delayMs(1000)
     }
 }
 
