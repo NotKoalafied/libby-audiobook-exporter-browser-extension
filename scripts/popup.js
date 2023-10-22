@@ -78,10 +78,13 @@ async function main() {
     }
 
     while (true) {
-        const book = await chrome.runtime.sendMessage({
-            command: Commands.GetBook,
-            titleId: titleId
-        });
+        // const book = await chrome.runtime.sendMessage({
+        //     command: Commands.GetBook,
+        //     titleId: titleId
+        // });
+        const booksWrapper = await chrome.storage.session.get('books') ?? {}
+        const books = booksWrapper.books ?? {}
+        const book = books[titleId]
         renderDownloadList(book)
         await delayMs(2000)
     }

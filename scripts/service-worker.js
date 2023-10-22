@@ -1,4 +1,4 @@
-import { Commands, getTailAfter, base64UrlDecode, makePathNameSafe, delayRoughlyMs } from './common.js'
+import { Commands, getTailAfter, makePathNameSafe, delayRoughlyMs } from './common.js'
 
 // globals
 // { titleId: {
@@ -16,9 +16,11 @@ import { Commands, getTailAfter, base64UrlDecode, makePathNameSafe, delayRoughly
 let books = {}
 
 async function loadBookFromStorage() {
-    const books = await chrome.storage.session.get('books') ?? {}
+    const booksWrapper = await chrome.storage.session.get('books') ?? {}
+    books = booksWrapper.books ?? {}
     removeExpiredBooks()
-    chrome.storage.session.set(books)
+    chrome.storage.session.set({ books: books })
+
     function removeExpiredBooks() {
         Object.keys(books).forEach(
             titleId => {
@@ -32,9 +34,14 @@ async function loadBookFromStorage() {
 }
 
 async function retrieveBooks(passportTitles) {
-    for (const titleId of Object.keys(passportTitles)) {
+    const titleKeys = Object.keys(passportTitles)
+    let numRetrieved = 0
+    for (const titleId of titleKeys) {
         await retrieveBookInfo(titleId)
-        await delayRoughlyMs(200)
+        numRetrieved++
+        if (numRetrieved < titleKeys.length) {
+            await delayRoughlyMs(200)
+        }
     }
 
     async function retrieveBookInfo(titleId) {
@@ -71,7 +78,7 @@ async function retrieveBooks(passportTitles) {
             }
         )
         book.downloading = false
-        chrome.storage.session.set(books)
+        chrome.storage.session.set({ books: books })
     }
 }
 
@@ -104,9 +111,10 @@ async function downloadFiles(files, book) {
             url: fileInfo.url,
             filename: `${book.downloadDir}/${filename}`,
         })
+        chrome.storage.session.set({ books: books })
         await delayRoughlyMs(5000)
         fileInfo.downloaded = true
-        chrome.runtime.sendMessage({ command: Commands.UpdateBook, book: book })
+        // chrome.runtime.sendMessage({ command: Commands.UpdateBook, book: book })
     }
 }
 
@@ -134,8 +142,8 @@ async function messageListener(message, sender, sendResponse) {
 }
 
 async function main() {
-    await loadBookFromStorage()
     chrome.runtime.onInstalled.addListener(installedListener)
+    await loadBookFromStorage()
     chrome.runtime.onMessage.addListener(messageListener)
 }
 
