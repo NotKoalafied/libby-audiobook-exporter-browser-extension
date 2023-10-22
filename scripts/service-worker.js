@@ -123,7 +123,7 @@ async function messageListener(message) {
         case Commands.GetBook:
             chrome.runtime.sendMessage({
                 command: Commands.UpdateBook,
-                book: books[message.titleId]
+                book: books[message?.titleId]
             })
             break;
         case Commands.Download:

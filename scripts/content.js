@@ -35,7 +35,7 @@ async function notifyOnUpdate() {
     }
 }
 
-async function getAudioBooks() {
+async function getAudioBooks(titleId) {
     const passportJson = localStorage['dewey:title:passport:all']
     const titlesJson = localStorage['dewey:title:all']
     if (!passportJson || !titlesJson) {
@@ -44,17 +44,22 @@ async function getAudioBooks() {
 
     const passport = JSON.parse(passportJson)
     const titles = JSON.parse(titlesJson)
-    const bookMap = getBookMap()
+    const bookMap = getBookMap(titleId)
     filterBookMap()
     return bookMap
 
-    function getBookMap() {
+    function getBookMap(titleId) {
         const bookMap = Object.fromEntries(
-            passport.all.map(
-                key => [key.titleId, {
-                    passport: key,
-                }]
-            )
+            passport.all
+                .filter(
+                    // double equal, not triple to relax comparison
+                    key => titleId ? key.titleId == titleId : true
+                )
+                .map(
+                    key => [key.titleId, {
+                        passport: key,
+                    }]
+                )
         )
         titles.all.forEach(
             key => {
@@ -78,9 +83,14 @@ async function getAudioBooks() {
     }
 }
 
+function getTailAfter(str, sep) {
+    return str?.substring(str?.lastIndexOf(sep) + 1)
+}
+
 async function main() {
     await notifyOnUpdate()
-    const books = await getAudioBooks()
+    const titleId = getTailAfter(location.href, '/')
+    const books = await getAudioBooks(titleId)
     await chrome.runtime.sendMessage({
         // command: Commands.ReportBooks,
         command: "ReportBooks",
