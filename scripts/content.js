@@ -1,5 +1,3 @@
-// import { Commands } from "./common"
-
 const ENDING_DATE = new Date(2023, 9, 10) // 2030-Oct-10
 const LAE_NOTICE_ID = 'lae-update-notice'
 const LAE_NOTICE_CLOSE_ID = 'lae-update-notice'
@@ -76,24 +74,21 @@ async function getAudioBooks(titleId) {
             key => {
                 if (bookMap[key]?.title?.format !== 'audiobook'
                     || bookMap[key]?.passport?.expiresAt < Date.now()) {
-                    delete bookMap.key
+                    delete bookMap[key]
                 }
             }
         )
     }
 }
 
-function getTailAfter(str, sep) {
-    return str?.substring(str?.lastIndexOf(sep) + 1)
-}
-
 async function main() {
-    await notifyOnUpdate()
-    const titleId = getTailAfter(location.href, '/')
+    const src = chrome.runtime.getURL("scripts/common.js");
+    const module = await import(src);
+    const titleId = module.getTailAfter(location.href, '/')
     const books = await getAudioBooks(titleId)
+    console.info(books)
     await chrome.runtime.sendMessage({
-        // command: Commands.ReportBooks,
-        command: "ReportBooks",
+        command: module.Commands.ReportBooks,
         books: books
     })
 }
