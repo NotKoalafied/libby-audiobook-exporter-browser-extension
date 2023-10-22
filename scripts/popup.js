@@ -1,7 +1,6 @@
 import { Commands, getTailAfter, dashify, delayMs } from "./common.js"
 
 // globals
-let book
 let titleId
 
 // const

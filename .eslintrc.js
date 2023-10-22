@@ -1,7 +1,9 @@
 module.exports = {
     "env": {
         "browser": true,
-        "es2021": true
+        "es2021": true,
+        // https://stackoverflow.com/a/50513752/404271
+        "webextensions": true
     },
     "extends": "eslint:recommended",
     "overrides": [
@@ -23,6 +25,4 @@ module.exports = {
     },
     "rules": {
     },
-    // https://stackoverflow.com/a/50513752/404271
-    "webextensions": true
 }
