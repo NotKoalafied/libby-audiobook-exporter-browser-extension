@@ -33,7 +33,7 @@ async function notifyOnUpdate() {
     }
 }
 
-async function getAudioBooks(titleId) {
+function getAudioBooks(titleId) {
     const passportJson = localStorage['dewey:title:passport:all']
     const titlesJson = localStorage['dewey:title:all']
     if (!passportJson || !titlesJson) {
@@ -86,7 +86,6 @@ async function main() {
     const module = await import(src);
     const titleId = module.getTailAfter(location.href, '/')
     const books = await getAudioBooks(titleId)
-    console.info(books)
     await chrome.runtime.sendMessage({
         command: module.Commands.ReportBooks,
         books: books
