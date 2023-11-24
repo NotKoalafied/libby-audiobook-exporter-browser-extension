@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Libby (Legacy) Audiobook Exporter",
+  "name": "Sora Audiobook Exporter",
   "version": "1.2.1",
-  "description": "A browser extension which can save Libby audiobooks to your local drive.",
+  "description": "A browser extension which can save Sora audiobooks to your local drive.",
   "icons": {
     "16": "images/icon16.png",
     "32": "images/icon32.png",
@@ -22,7 +22,7 @@
       ],
       "run_at": "document_end",
       "matches": [
-        "*://*.libbyapp.com/open/loan/*"
+        "*://*.soraapp.com/open"
       ]
     }
   ],
@@ -31,7 +31,7 @@
     "downloads"
   ],
   "host_permissions": [
-    "*://*.libbyapp.com/*"
+    "*://*.soraapp.com/*"
   ],
   "homepage_url": "https://github.com/houtianze/libby-audiobook-exporter-browser-extension"
 }

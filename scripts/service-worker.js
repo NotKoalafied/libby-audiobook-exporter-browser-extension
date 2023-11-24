@@ -14,17 +14,20 @@
 
 const books = {}
 
-const iframeFilter = { urls: ["*://*.libbyapp.com/?m=eyJ*"] }
+const rosterFilter = { urls: ["*://*.soraapp.com/_d/roster.json?m=eyJ*"] }
 async function iframeCallback(details) {
     const url = new URL(details.url)
     const baseUrl = url.origin
     const encodedM = url?.searchParams?.get('m')
     const m = base64UrlDecode(encodedM)
     const mObj = JSON.parse(m)
-    const titleId = mObj?.tdata?.codex?.title?.titleId
+    const titleId = mObj?.tdata['title-id']
     const openbookUrl = `${baseUrl}/_d/openbook.json`
     const openbookResponse = await fetch(openbookUrl)
     const openbook = await openbookResponse.json()
+    const rosterUrl = `${baseUrl}/_d/roster.json`
+    const rosterResponse = await fetch(rosterUrl)
+    const roster = await rosterResponse.json()
 
     const info = {}
     books[titleId] = info
@@ -34,7 +37,9 @@ async function iframeCallback(details) {
     info.downloadDir = makePathNameSafe(info.title)
     info.authors = openbook?.creator
     info.openbookUrl = openbookUrl
-    info.coverUrl = mObj?.tdata?.codex?.title?.cover?.imageURL
+    info.coverUrl = roster.filter(x => x?.group === 'title-content')
+        ?.[0]?.entries.filter(x => /^.*\/cover\/.*big\.jpg$/.test(x?.url))
+        ?.[0]?.url
     const mp3Urls = openbook?.spine.map(
         x => `${baseUrl}/${x.path}`
     )
@@ -66,7 +71,7 @@ function base64UrlDecode(s) {
     return atob(s);
 }
 
-chrome.webRequest.onCompleted.addListener(iframeCallback, iframeFilter);
+chrome.webRequest.onCompleted.addListener(iframeCallback, rosterFilter);
 
 // https://stackoverflow.com/a/31976060/404271
 function makePathNameSafe(name) {

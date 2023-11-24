@@ -1,5 +1,7 @@
 // globals
-const titleId = getTailAfter(window.location.pathname, '/')
+const titleJson = localStorage['wishbone:title']
+const title = JSON.parse(titleJson)
+const titleId = title.titleId
 let book
 let downloadMap
 
@@ -11,6 +13,8 @@ const DOWNLOAD_LIST_ID = "lae-download-list"
 const PROGRESS_BAR_ID = "lae-progress-bar"
 const PROGRESS_ID = "lae-progress"
 const LAE_CLOSE_ID = "lae-close"
+
+const Z_INDEX_VALUE = 1000
 
 const INITIAL_BANNER = "Initializing download list...";
 const READY_BANNER = "\u2190 download | toggle list \u2192";
@@ -45,6 +49,7 @@ function regenerateDownloadDiv() {
     const ul = document.createElement("ul")
     theDiv.appendChild(ul)
     theDiv.style.display = "none"
+    theDiv.style.zIndex = Z_INDEX_VALUE
     Object.keys(downloadMap).forEach(
         key => {
             createListItem(ul, key, downloadMap[key])
@@ -117,14 +122,16 @@ function attachElements() {
     </div>
     <div id="${DOWNLOAD_LIST_ID}"></div>
     `
-
     let laeDiv = document.getElementById(LAE_CONTAINER_ID);
     if (!laeDiv) {
         laeDiv = document.createElement("div");
         laeDiv.innerHTML = html;
         laeDiv.id = LAE_CONTAINER_ID;
-        laeDiv.className = "navigation";
-        document.body.insertBefore(laeDiv, document.body.firstChild);
+        laeDiv.className = "nav-action-bar";
+        laeDiv.style.zIndex = Z_INDEX_VALUE;
+        document.body.insertBefore(laeDiv, document.body.firstChild)
+        const bifocal = document.querySelector("[class^='bifocal-view-']")
+        bifocal.style.top = '28px'
     }
 
     laeDiv.querySelector(`#${EXPORT_BUTTON_ID}`).onclick = exportAudio
@@ -166,10 +173,6 @@ function getTailAfter(str, sep) {
     return str.substring(str.lastIndexOf(sep) + 1)
 }
 
-attachElements();
-setInitialBanner();
-attachDownloadList();
-
 (async () => {
     const startMs = Date.now();
     let timeOuted = false;
@@ -181,6 +184,9 @@ attachDownloadList();
         await delayRoughlyMs(1000);
         book = await chrome.runtime.sendMessage({ command: "GetMap", titleId: titleId });
     }
+    attachElements();
+    setInitialBanner();
     attachDownloadList();
+
     timeOuted ? setFailedBanner() : setReadyBanner();
 })();

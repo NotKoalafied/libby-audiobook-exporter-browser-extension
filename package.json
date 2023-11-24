@@ -1,13 +1,13 @@
 {
-  "name": "libby-audiobook-exporter-browser-extension",
+  "name": "sora-audiobook-exporter-browser-extension",
   "version": "1.0.0",
-  "description": "Libby Audiobook Exporter",
+  "description": "Sora Audiobook Exporter",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
-    "libby",
+    "sora",
     "audiobook",
     "exporter"
   ],
