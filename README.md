@@ -12,3 +12,4 @@ Code branches
 - `master` - The release branch used for chrome web store release, this is the default branch.
 - `popup` - The current wip branch that uses popup (`action` in manifest, just click on the extension icon) to download. It will be synced back to the `master` branch once the feature is considered stable.
 - `content-script` (DEPRECATED) - The deprecated branch that uses `content_scripts` to download.
+- `sora` - The extension for soraapp.com
