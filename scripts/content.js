@@ -136,7 +136,13 @@ function attachElements() {
 
     laeDiv.querySelector(`#${EXPORT_BUTTON_ID}`).onclick = exportAudio
     laeDiv.querySelector(`#${TOGGLE_LIST_BUTTON_ID}`).onclick = toggleDownloadList
-    laeDiv.querySelector(`#${LAE_CLOSE_ID}`).onclick = () => laeDiv.style.display = "none";
+    function close() {
+        const laeDiv = document.getElementById(LAE_CONTAINER_ID);
+        laeDiv.style.display = "none";
+        const bifocal = document.querySelector("[class^='bifocal-view-']")
+        bifocal.style.top = ''
+    }
+    laeDiv.querySelector(`#${LAE_CLOSE_ID}`).onclick = close
 }
 
 function attachDownloadList() {
