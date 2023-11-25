@@ -4,7 +4,7 @@ Sora Audiobook Exporter Browser Extension
 A browser plugin to download audio (mp3) files from soraapp.com audiobooks
 --------------------------------------------------------------------------
 
-- Chrome web store link: https://chrome.google.com/webstore/detail/sora-audiobook-exporter/TO_BE_FILLED
+- Chrome web store link: https://chromewebstore.google.com/detail/sora-audiobook-exporter/encfiidbdjibjhlchleofknhelkobolc
 - Homepage: https://github.com/houtianze/libby-audiobook-exporter-browser-extension
 
 Code branches
