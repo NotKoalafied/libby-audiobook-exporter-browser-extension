@@ -70,8 +70,9 @@ chrome.webRequest.onCompleted.addListener(iframeCallback, iframeFilter);
 
 // https://stackoverflow.com/a/31976060/404271
 function makePathNameSafe(name) {
-    // return name.replace(/[/<>:"/\\|?*\x00-\x1f]/g, '_');
-    return name.replace(/[<>:"/\\|?*]/g, '_');
+    // eslint warning: no-control-regex
+    // return name.replace(/[<>:"/\\|?*\x00-\x1f]/g, '_');
+    return name.replace(/[<>:"/\\|?*,.]/g, '_');
 }
 
 chrome.runtime.onMessage.addListener(
