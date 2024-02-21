@@ -77,7 +77,7 @@ chrome.webRequest.onCompleted.addListener(iframeCallback, rosterFilter);
 function makePathNameSafe(name) {
     // eslint warning: no-control-regex
     // return name.replace(/[<>:"/\\|?*\x00-\x1f]/g, '_');
-    return name.replace(/[<>:"/\\|?*,.]/g, '_');
+    return name.replace(/[<>:"/\\|?*,. ]/g, '_');
 }
 
 chrome.runtime.onMessage.addListener(
