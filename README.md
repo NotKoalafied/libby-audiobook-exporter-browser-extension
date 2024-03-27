@@ -14,6 +14,8 @@ A browser plugin to download audio (mp3) files from libby.com audiobooks
 3. Now click on the "Load unpacked" button and select the directory from step 1.
 4. Done.
 
+If you need the crx file for other Chromium based browser, it's now under the [release](release) directory.
+
 ---
 
 - Chrome web store link: https://chrome.google.com/webstore/detail/libby-audiobook-exporter/ophjgobioamjpkoahcmlofkdbpfjodig
