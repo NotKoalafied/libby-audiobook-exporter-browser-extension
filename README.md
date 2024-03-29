@@ -9,7 +9,7 @@ A browser plugin to download audio (mp3) files from libby.com audiobooks
 
 *As this extension has been taken down from the Chrome Web Store (but be rest assured that this extension is safe and contains no malicious code, you can always examine the source code as it is not that complex. The reason for the takedown was due to someone filed a claim that certain company "has an officially registered trademark to 'Libby' in this context." etc and Google complied), in order to use it now, you need to load it via the "Developer mode" in Chrome (or other Chromium based browsers) with steps below:*
 
-1. Download this repository as a zip file via [this link](https://github.com/houtianze/libby-audiobook-exporter-browser-extension/blob/master/archive/refs/heads/master.zip) and unzip it to a directory of your choice. (Or if you use git, just clone this repository.)
+1. Download this repository as a zip file (Click on the green ${\color{green}Code}$ button and choose "Download Zip") and unzip it to a directory of your choice. (Or if you use git, just clone this repository.)
 2. Go to [chrome://extensions/](chrome://extensions/) in Chrome, and enable that "Developer mode" toggle.
 3. Now click on the "Load unpacked" button and select the directory from step 1 where you extracted the files to.
 4. Done.
