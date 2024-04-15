@@ -28,3 +28,15 @@ Code branches
 - `popup` - The current wip branch that uses popup (`action` in manifest, just click on the extension icon) to download. It will be synced back to the `master` branch once the feature is considered stable.
 - `content-script` (LEGACY) - The legacy branch that uses `content_scripts` to download.
 - `sora` - The extension for soraapp.com
+
+Troubleshooting
+--------------- 
+---
+
+It's possible that using the Libby 'Copy To Another Device' feature can cause the new device to be unable to download using this extension due to a variance in how Libby communicates the mp3 filenames to the browser. If this happens, the extension will throw a [TypeError: Cannot read properties of undefined](https://github.com/houtianze/libby-audiobook-exporter-browser-extension/issues/12). The following steps have been demonstrated to resolve this issue.
+
+1. Clear all cookies and site data from Libby.
+2. When adding your card(s) back into Libby, do it manually. Copying them from another device seems to be part of what was causing the issue. It may be possible to copy from a different device instead, but that has not yet been tested.
+3. Attempt to use the extension again as normal.
+
+---
